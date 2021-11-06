@@ -1,0 +1,25 @@
+{
+  "name": "mysql-crud-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.3",
+    "ejs": "^2.5.6",
+    "express": "^4.17.1",
+    "express-flash": "0.0.2",
+    "express-myconnection": "^1.0.4",
+    "express-session": "^1.17.0",
+    "express-validator": "^3.2.0",
+    "method-override": "^2.3.10",
+    "morgan": "^1.9.1",
+    "mysql": "^2.18.1",
+    "requset": "0.0.1-security"
+  },
+  "author": "",
+  "license": "ISC"
+}

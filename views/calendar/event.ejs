@@ -1,0 +1,157 @@
+<%-include ../layouts/header.ejs%>
+<body>
+    <a><font size="5"></font size> </a>
+    <!--驗證登入按鈕-->
+    <button id="authorize_button"  style="display: none;">Authorize</button>
+    <!--登出按鈕-->
+    <button id="signout_button" style="display: none;">Sign Out</button>
+    <br>
+
+    <form action="/calendar/Search" method="post" name="form">
+      <table>
+        <td><input type="text" class="form-control" id ="searchText" name="searchText"  placeholder="Event 搜尋 ..." aria-label="Search" value=""></td>
+        <td><button id="search_button" type="submit">Search</button></td>
+      </table>
+      <td><input type="hidden" class="form-control" id="event_content" name="event_content" value=""></td>
+      <td><input type="hidden" class="form-control" id="event_content_time" name="event_content_time" value=""></td>
+    </form>
+
+    <!-- Event -->
+    <br>
+    <table id= event_list  cellpadding="10" border="0">
+      <tr style='text-align:left; background-color:#CCC'>
+        <th>id</th>
+        <th>Date</th>
+        <th>Event</th>
+        <th>Action</th>
+      </tr>
+    <% if (data) { %>
+      <% data.forEach(function(event){ %>
+        <tr>
+          <td><%= event.id %></td>
+          <td><%= event.Date %></td>
+          <td><%= event.Event %></td>
+        <td>
+          <div style="float:left">
+            <table>
+            <input type="submit" name="Edit" value='Edit' onclick="calendar_Edit('<%= event.id %>');">
+            <input type="submit" name="delete" value='Delete' onclick="calendar_delete('<%= event.id %>','<%= event.Event_id %>');">
+          </table>
+          </div>
+        </td>
+      </tr>
+    <% }) %>
+    <% } %>
+    </table>
+
+    <pre id="content" style="white-space: pre-wrap;"></pre>    
+
+<script type="text/javascript">
+      CLIENT_ID = '';
+      var API_KEY = '';
+      var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+      var SCOPES = "https://www.googleapis.com/auth/calendar";
+
+       //用id取得物件的value
+      var authorizeButton = document.getElementById('authorize_button');
+      var signoutButton = document.getElementById('signout_button');
+      var search_button = document.getElementById('search_button');
+      var searchText = document.getElementById('searchText');
+
+       function handleClientLoad() {
+        gapi.load('client:auth2', initClient);
+      }
+
+       function initClient() {
+        gapi.client.init({
+          apiKey: API_KEY,
+          clientId: CLIENT_ID,
+          discoveryDocs: DISCOVERY_DOCS,
+          scope: SCOPES
+        }).then(function () {
+          // Listen for sign-in state changes.
+          gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+          // Handle the initial sign-in state.
+          updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+          authorizeButton.onclick = handleAuthClick;  // 跳轉頁面用
+          signoutButton.onclick = handleSignoutClick;
+        }, function(error) {
+          appendPre(JSON.stringify(error, null, 2));
+        });
+      }
+
+      // 指定按鈕出現跟消失
+      function updateSigninStatus(isSignedIn) { 
+        if (isSignedIn) {
+          authorizeButton.style.display = 'none';
+          signoutButton.style.display = 'block';
+          event_list.style.display = 'block';
+          search_button.style.display = 'block';
+          searchText.style.display = 'block'
+
+        } else {
+          authorizeButton.style.display = 'block';
+          signoutButton.style.display = 'none';
+          event_list.style.display = 'none';
+          search_button.style.display = 'none';
+          searchText.style.display = 'none';
+        }
+      }
+
+      // 點了按鈕登入(觸發事件)
+       function handleAuthClick(event) { 
+        gapi.auth2.getAuthInstance().signIn();
+      }
+
+      // 點了按鈕登出(觸發事件)
+      function handleSignoutClick(event) {
+        gapi.auth2.getAuthInstance().signOut();
+        refresh()
+      }
+
+      function refresh(){ 
+        window.location.reload();
+      }
+
+      function appendPre(message) {
+        var pre = document.getElementById('content');
+        // 建立節點
+        var textContent = document.createTextNode(message + '\n');
+        // 把建立的節點附加在最後面
+        pre.appendChild(textContent);
+      }
+
+      // event
+      function calendar_delete(id,event_id) {
+        var params = {
+          calendarId: 'primary',
+          eventId: event_id,
+        };
+        var request = gapi.client.calendar.events.delete({
+              'calendarId': 'primary',
+              'eventId': event_id,
+            });
+        request.execute(function(resp) {
+          console.log(resp);
+        });      
+        // 刪除sql event
+        window.location.href = "/calendar/delete?id=" + id;
+      }
+
+      // Edit
+      function calendar_Edit(id) {
+        // 刪除sql event
+        window.location.href = "/calendar/edit?id=" + id;
+      }
+
+</script>
+
+<script async defer src="https://apis.google.com/js/api.js"
+      onload="this.onload=function(){};handleClientLoad()" 
+      onreadystatechange="if (this.readyState === 'complete') this.onload()">
+      
+</script>
+  
+</body>
+
+<%-include ../layouts/footer.ejs%>

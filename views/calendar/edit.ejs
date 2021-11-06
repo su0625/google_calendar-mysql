@@ -1,0 +1,132 @@
+<%-include ../layouts/header.ejs%>
+
+
+<body>
+    <a><font size="5"></font size> </a>
+    <br>
+    <br>
+    
+    <% if (data) { %>
+      <% data.forEach(function(event){ %>
+    <form name="editform" action="/calendar/edit/" method="post" accept-charset="utf-8">
+      <input type="hidden" name="id" value="<%= event.id %>" />
+      <input type="hidden" name="event_id" value="<%= event.Event_id %>" />
+      <div style="margin-top:20px">
+          <label style="width:30vw">Start Date:</label>
+          <input  id = "start_date" name= "start_date" style="width:30%" placeholder="start_time"  type="datetime-local" value="<%=event.Date %>"  />
+          <input  id = "end_date" name= "end_date" style="width:30%" placeholder="end_time"  type="datetime-local" value=""  />
+
+      </div>
+      <div style="margin-top:20px">
+          <label style="width:30vw">Event:</label>
+          <input style="width:30%" type="text" id ="event_name" name="event_name" placeholder="Modify your event" value="<%=event.Event%>">
+      </div>
+      <div style="margin-top:15px">
+          <input type='submit' value='Submit' onclick="calendar_Edit('<%= event.id %>','<%= event.Event_id %>');">
+          <input type='reset' value='Reset'>
+          <input type='button' value='Back' onclick="javascript: window.history.back();">
+      </div>
+  </form>
+  <% }) %>
+  <% } %>
+    <pre id="content" style="white-space: pre-wrap;"></pre>    
+
+
+
+<script type="text/javascript">
+      // Client ID and API key from the Developer Console
+      CLIENT_ID = '';
+      var API_KEY = '';
+      // Array of API discovery doc URLs for APIs used by the quickstart
+      var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+      var SCOPES = "https://www.googleapis.com/auth/calendar";
+
+      /**
+       *  On load, called to load the auth2 library and API client library.
+       */
+       function handleClientLoad() {
+        gapi.load('client:auth2', initClient);
+      }
+       /**
+       *  Initializes the API client library and sets up sign-in state
+       *  listeners.
+       */
+       function initClient() {
+        gapi.client.init({
+          apiKey: API_KEY,
+          clientId: CLIENT_ID,
+          discoveryDocs: DISCOVERY_DOCS,
+          scope: SCOPES
+        }).then(function () {
+          gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+          updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+        }, function(error) {
+          appendPre(JSON.stringify(error, null, 2));
+        });
+      }
+
+      // 指定按鈕出現跟消失
+      function updateSigninStatus(isSignedIn) { 
+        if (isSignedIn) {
+          console.log("Sign In")
+        } else {
+          console.log("NO")
+
+        }
+      }
+
+      function refresh(){
+        window.location.reload();
+      }
+
+      /**
+       * Append a pre element to the body containing the given message
+       * as its text node. Used to display the results of the API call.
+       *
+       * @param {string} message Text to be placed in pre element.
+        */
+      function appendPre(message) {
+        var pre = document.getElementById('content');
+        // 建立節點
+        var textContent = document.createTextNode(message + '\n');
+        // 把建立的節點附加在最後面
+        pre.appendChild(textContent);
+      }
+      
+      // event
+      function calendar_Edit(id,event_id) {
+        var event_content = document.getElementById("event_name").value;
+        var start_date = document.getElementById("start_date").value;
+        var end_date = document.getElementById("end_date").value;
+        var request = gapi.client.calendar.events.update({
+              'calendarId': 'primary',
+              'eventId': event_id,
+              "resource": {
+                "end": {
+                  "dateTime": end_date+":00",
+                  "timeZone":"Asia/Taipei"
+                },
+                "start": {
+                  "dateTime": start_date+":00",
+                  "timeZone":"Asia/Taipei"
+                },
+                "summary": event_content
+              }
+            });
+        request.execute(function(resp) {
+          console.log(resp);
+        });
+      }
+
+</script>
+
+<script async defer src="https://apis.google.com/js/api.js"
+      onload="this.onload=function(){};handleClientLoad()" 
+      onreadystatechange="if (this.readyState === 'complete') this.onload()">
+      
+</script>
+  
+</body>
+
+
+<%-include ../layouts/footer.ejs%>
