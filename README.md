@@ -3,6 +3,6 @@
 
 需要更改
 
-1.Calendar 資料夾底下的 CLIENT_ID,API_KEY
+1.Views/Calendar 底下的Ejs檔 CLIENT_ID,API_KEY
 
 2.config.js 底下的 database 改為自己的 password
